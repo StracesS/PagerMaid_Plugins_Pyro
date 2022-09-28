@@ -414,10 +414,10 @@ async def trace_user(client: Client, message: Message):
 @listener(incoming=True, outgoing=True, ignore_edited=True)
 async def trace_keyword(client: Client, message: Message):
     with contextlib.suppress(Exception):
-        if message.text:
+        if message.text or message.caption:
             if keyword_list := cached_sqlite.get("trace.keywordlist", None):
                 for keyword in keyword_list:
-                    if keyword in message.text:
+                    if (message.text and keyword in message.text) or (message.caption and keyword in message.caption):
                         if reaction_list := cached_sqlite.get(
                                 f"trace.keyword.{keyword.encode().hex()}", None
                         ):
