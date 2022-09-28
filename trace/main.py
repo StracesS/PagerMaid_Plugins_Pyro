@@ -413,8 +413,6 @@ async def trace_user(client: Client, message: Message):
 
 @listener(incoming=True, outgoing=True, ignore_edited=True)
 async def trace_keyword(client: Client, message: Message):
-    if message.from_user is None:
-        return
     with contextlib.suppress(Exception):
         if message.text:
             if keyword_list := cached_sqlite.get("trace.keywordlist", None):
