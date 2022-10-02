@@ -2,6 +2,7 @@
 import contextlib
 from typing import Optional, List, Dict, Tuple, Union
 from functools import reduce
+import copy
 
 from pyrogram.enums import MessageEntityType, ParseMode
 from pyrogram.raw.functions.messages import SendReaction
@@ -239,14 +240,12 @@ def append_config(text: str, entities: List[MessageEntity]) -> Tuple[str, List[M
 
 @listener(command="trace",
           need_admin=True,
-          diagnostics=False,
+          diagnostics=True,
           description=USAGE)
 async def trace(bot: Client, message: Message):
-    '''
     # For debug use
     if len(message.parameter) and message.parameter[0] == "magicword":
         return await message.edit(str(message))
-    '''
     if len(message.parameter) == 0:  # Either untrace someone or throw error
         if message.reply_to_message is None or message.reply_to_message.from_user is None:
             return await print_usage(message)
@@ -293,13 +292,13 @@ async def trace(bot: Client, message: Message):
             if message.parameter[0] == "status":
                 text, entities = append_config(text, entities)
             if message.parameter[0] == "clean":
-                for (k, v) in cached_sqlite:
-                    if k.startswith("trace."):
+                for k in copy.deepcopy(cached_sqlite).keys():
+                    if k.startswith("trace.keyword") or k.startswith("trace.user_id"):
                         del cached_sqlite[k]
                         del sqlite[k]
             return await edit_and_delete(message, text, entities=entities, seconds=5, parse_mode=ParseMode.MARKDOWN)
         elif message.parameter[0] == "resettrace":
-            for (k, v) in cached_sqlite:
+            for k in copy.deepcopy(cached_sqlite).keys():
                 if k.startswith("trace."):
                     del cached_sqlite[k]
                     del sqlite[k]
